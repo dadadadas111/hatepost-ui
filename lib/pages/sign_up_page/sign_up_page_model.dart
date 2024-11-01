@@ -28,7 +28,7 @@ class SignUpPageModel extends FlutterFlowModel<SignUpPageWidget> {
   TextEditingController? textController3;
   late bool passwordVisibility2;
   String? Function(BuildContext, String?)? textController3Validator;
-  // Stores action output result for [Backend Call - API (sign up staging)] action in Button widget.
+  // Stores action output result for [Backend Call - API (check exist email staging)] action in Button widget.
   ApiCallResponse? response;
 
   @override

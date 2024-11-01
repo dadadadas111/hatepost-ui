@@ -2,8 +2,11 @@ import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
+import 'dart:async';
 import '/flutter_flow/custom_functions.dart' as functions;
+import 'package:easy_debounce/easy_debounce.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'sign_up_page_model.dart';
 export 'sign_up_page_model.dart';
 
@@ -43,6 +46,8 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -146,6 +151,11 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                               TextFormField(
                                 controller: _model.textController1,
                                 focusNode: _model.textFieldFocusNode1,
+                                onChanged: (_) => EasyDebounce.debounce(
+                                  '_model.textController1',
+                                  const Duration(milliseconds: 2000),
+                                  () => safeSetState(() {}),
+                                ),
                                 autofocus: false,
                                 obscureText: false,
                                 decoration: InputDecoration(
@@ -210,6 +220,11 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                               TextFormField(
                                 controller: _model.textController2,
                                 focusNode: _model.textFieldFocusNode2,
+                                onChanged: (_) => EasyDebounce.debounce(
+                                  '_model.textController2',
+                                  const Duration(milliseconds: 2000),
+                                  () => safeSetState(() {}),
+                                ),
                                 autofocus: false,
                                 obscureText: !_model.passwordVisibility1,
                                 decoration: InputDecoration(
@@ -288,6 +303,11 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                               TextFormField(
                                 controller: _model.textController3,
                                 focusNode: _model.textFieldFocusNode3,
+                                onChanged: (_) => EasyDebounce.debounce(
+                                  '_model.textController3',
+                                  const Duration(milliseconds: 2000),
+                                  () => safeSetState(() {}),
+                                ),
                                 autofocus: false,
                                 obscureText: !_model.passwordVisibility2,
                                 decoration: InputDecoration(
@@ -376,68 +396,106 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                       ),
                                 ),
                               FFButtonWidget(
-                                onPressed: () async {
-                                  if (_model.textController3.text ==
-                                      _model.textController2.text) {
-                                    _model.response =
-                                        await SignUpStagingCall.call(
-                                      email: _model.textController1.text,
-                                      password: _model.textController2.text,
-                                    );
+                                onPressed: ((_model.textController1.text ==
+                                                '') ||
+                                        (_model.textController2.text ==
+                                                '') ||
+                                        (_model.textController3.text ==
+                                                '') ||
+                                        !functions.getValidPassword(
+                                            _model.textController2.text))
+                                    ? null
+                                    : () async {
+                                        if (_model.textController3.text ==
+                                            _model.textController2.text) {
+                                          _model.response =
+                                              await CheckExistEmailStagingCall
+                                                  .call(
+                                            email: _model.textController1.text,
+                                          );
 
-                                    if ((_model.response?.succeeded ?? true)) {
-                                      FFAppState().tokenExpiredAt =
-                                          functions.getExpiredTokenTime();
-                                      FFAppState().refreshToken = getJsonField(
-                                        (_model.response?.jsonBody ?? ''),
-                                        r'''$.refreshToken''',
-                                      ).toString();
-                                      FFAppState().accessToken = getJsonField(
-                                        (_model.response?.jsonBody ?? ''),
-                                        r'''$.idToken''',
-                                      ).toString();
-                                      safeSetState(() {});
-                                      _model.isErrror = false;
-                                      safeSetState(() {});
+                                          if (getJsonField(
+                                            (_model.response?.jsonBody ?? ''),
+                                            r'''$.exist''',
+                                          )) {
+                                            // this is action to get the error message. will be reused in sign up
+                                            _model.errorCode =
+                                                valueOrDefault<String>(
+                                              getJsonField(
+                                                (_model.response?.jsonBody ??
+                                                    ''),
+                                                r'''$.message''',
+                                              )?.toString(),
+                                              'EMAIL_EXISTS',
+                                            );
+                                            _model.errorMessage = () {
+                                              if (_model.errorCode ==
+                                                  'INVALID_LOGIN_CREDENTIALS') {
+                                                return 'Email or password is not correct.';
+                                              } else if (_model.errorCode ==
+                                                  'INVALID_EMAIL') {
+                                                return 'Email is not valid.';
+                                              } else if ((_model.errorCode ==
+                                                      'MISSING_EMAIL') ||
+                                                  (_model.errorCode ==
+                                                      'MISSING_PASSWORD')) {
+                                                return 'Please input email and password.';
+                                              } else if (_model.errorCode ==
+                                                  'EMAIL_EXISTS') {
+                                                return 'This email is used.';
+                                              } else {
+                                                return 'Unexpected error occurs.';
+                                              }
+                                            }();
+                                            _model.isErrror = true;
+                                            safeSetState(() {});
+                                          } else {
+                                            FFAppState().email =
+                                                _model.textController1.text;
+                                            safeSetState(() {});
+                                            _model.isErrror = false;
+                                            safeSetState(() {});
+                                            unawaited(
+                                              () async {
+                                                await SendVerifyStagingCall
+                                                    .call(
+                                                  email: FFAppState().email,
+                                                );
+                                              }(),
+                                            );
 
-                                      context.pushNamed('VerifyOTP');
-                                    } else {
-                                      // this is action to get the error message. will be reused in sign up
-                                      _model.errorCode = getJsonField(
-                                        (_model.response?.jsonBody ?? ''),
-                                        r'''$.message''',
-                                      ).toString();
-                                      _model.errorMessage = () {
-                                        if (_model.errorCode ==
-                                            'INVALID_LOGIN_CREDENTIALS') {
-                                          return 'Email or password is not correct.';
-                                        } else if (_model.errorCode ==
-                                            'INVALID_EMAIL') {
-                                          return 'Email is not valid.';
-                                        } else if ((_model.errorCode ==
-                                                'MISSING_EMAIL') ||
-                                            (_model.errorCode ==
-                                                'MISSING_PASSWORD')) {
-                                          return 'Please input email and password.';
-                                        } else if (_model.errorCode ==
-                                            'EMAIL_EXISTS') {
-                                          return 'This email is used.';
+                                            context.pushNamed(
+                                              'VerifyOTP',
+                                              queryParameters: {
+                                                'mode': serializeParam(
+                                                  'EMAIL_VERIFICATION',
+                                                  ParamType.String,
+                                                ),
+                                                'password': serializeParam(
+                                                  _model.textController2.text,
+                                                  ParamType.String,
+                                                ),
+                                              }.withoutNulls,
+                                              extra: <String, dynamic>{
+                                                kTransitionInfoKey:
+                                                    const TransitionInfo(
+                                                  hasTransition: true,
+                                                  transitionType:
+                                                      PageTransitionType
+                                                          .rightToLeft,
+                                                ),
+                                              },
+                                            );
+                                          }
                                         } else {
-                                          return 'Unexpected error occurs.';
+                                          _model.errorMessage =
+                                              'Confirm password does not match.';
+                                          _model.isErrror = true;
+                                          safeSetState(() {});
                                         }
-                                      }();
-                                      _model.isErrror = true;
-                                      safeSetState(() {});
-                                    }
-                                  } else {
-                                    _model.errorMessage =
-                                        'Confirm password does not match.';
-                                    _model.isErrror = true;
-                                    safeSetState(() {});
-                                  }
 
-                                  safeSetState(() {});
-                                },
+                                        safeSetState(() {});
+                                      },
                                 text: FFLocalizations.of(context).getText(
                                   'm9n5bil4' /* Sign Up */,
                                 ),
@@ -458,6 +516,7 @@ class _SignUpPageWidgetState extends State<SignUpPageWidget> {
                                       ),
                                   elevation: 3.0,
                                   borderRadius: BorderRadius.circular(25.0),
+                                  disabledColor: const Color(0xFFA39FF1),
                                 ),
                               ),
                             ].divide(const SizedBox(height: 16.0)),

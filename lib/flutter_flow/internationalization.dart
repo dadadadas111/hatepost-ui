@@ -229,31 +229,27 @@ final kTranslationsMap = <Map<String, Map<String, String>>>[
   {
     'ty0qil2m': {
       'en': 'Verify OTP',
-      'vi': '',
+      'vi': 'Xác minh OTP',
     },
     '2r4cc30k': {
       'en': 'Enter the 6-digit code sent to your email',
-      'vi': '',
-    },
-    '6t61gybm': {
-      'en': 'Verification failed',
-      'vi': '',
+      'vi': 'Nhập mã 6 chữ số được gửi đến email của bạn',
     },
     'g7i3fdfe': {
       'en': 'Resend',
-      'vi': '',
+      'vi': 'Gửi lại',
     },
     'hngg4f8q': {
       'en': 'Verify',
-      'vi': '',
+      'vi': 'Xác minh',
     },
     'omudf87k': {
       'en': 'Next resend available at',
-      'vi': '',
+      'vi': 'Gửi lại tiếp theo có sẵn tại',
     },
     'utsyojl4': {
       'en': 'Resend',
-      'vi': '',
+      'vi': 'Gửi lại',
     },
   },
   // Miscellaneous

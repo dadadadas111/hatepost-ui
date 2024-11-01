@@ -63,6 +63,88 @@ class SignUpStagingCall {
   }
 }
 
+class SendVerifyStagingCall {
+  static Future<ApiCallResponse> call({
+    String? email = '',
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "email": "$email"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'send verify staging',
+      apiUrl:
+          'https://staging-phot.onrender.com/api/auth/send-code-email-verification',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class VerifyStagingCall {
+  static Future<ApiCallResponse> call({
+    String? email = '',
+    int? code,
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "email": "$email",
+  "code": $code
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'verify staging',
+      apiUrl:
+          'https://staging-phot.onrender.com/api/auth/verify-code-email-verification',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
+class CheckExistEmailStagingCall {
+  static Future<ApiCallResponse> call({
+    String? email = '',
+  }) async {
+    final ffApiRequestBody = '''
+{
+  "email": "$email"
+}''';
+    return ApiManager.instance.makeApiCall(
+      callName: 'check exist email staging',
+      apiUrl: 'https://staging-phot.onrender.com/api/auth/check-existing-email',
+      callType: ApiCallType.POST,
+      headers: {},
+      params: {},
+      body: ffApiRequestBody,
+      bodyType: BodyType.JSON,
+      returnBody: true,
+      encodeBodyUtf8: false,
+      decodeUtf8: false,
+      cache: false,
+      isStreamingApi: false,
+      alwaysAllowBody: false,
+    );
+  }
+}
+
 class ApiPagingParams {
   int nextPageNumber = 0;
   int numItems = 0;

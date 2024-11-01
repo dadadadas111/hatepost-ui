@@ -15,3 +15,8 @@ DateTime? getExpiredTokenTime() {
   DateTime newDateTime = now.add(Duration(hours: 1, minutes: 30));
   return newDateTime;
 }
+
+bool getValidPassword(String input) {
+  // count the number of characters in a string
+  return input.length >= 8;
+}

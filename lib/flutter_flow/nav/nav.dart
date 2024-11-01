@@ -54,7 +54,16 @@ GoRouter createRouter(AppStateNotifier appStateNotifier) => GoRouter(
         FFRoute(
           name: 'VerifyOTP',
           path: '/verifyOTP',
-          builder: (context, params) => const VerifyOTPWidget(),
+          builder: (context, params) => VerifyOTPWidget(
+            mode: params.getParam(
+              'mode',
+              ParamType.String,
+            ),
+            password: params.getParam(
+              'password',
+              ParamType.String,
+            ),
+          ),
         )
       ].map((r) => r.toRoute(appStateNotifier)).toList(),
     );

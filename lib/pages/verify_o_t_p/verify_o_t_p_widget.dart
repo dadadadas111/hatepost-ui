@@ -1,14 +1,23 @@
+import '/backend/api_requests/api_calls.dart';
 import '/flutter_flow/flutter_flow_icon_button.dart';
 import '/flutter_flow/flutter_flow_theme.dart';
 import '/flutter_flow/flutter_flow_util.dart';
 import '/flutter_flow/flutter_flow_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'verify_o_t_p_model.dart';
 export 'verify_o_t_p_model.dart';
 
 class VerifyOTPWidget extends StatefulWidget {
-  const VerifyOTPWidget({super.key});
+  const VerifyOTPWidget({
+    super.key,
+    String? mode,
+    required this.password,
+  }) : mode = mode ?? 'EMAIL_VERIFICATION';
+
+  final String mode;
+  final String? password;
 
   @override
   State<VerifyOTPWidget> createState() => _VerifyOTPWidgetState();
@@ -37,6 +46,8 @@ class _VerifyOTPWidgetState extends State<VerifyOTPWidget> {
 
   @override
   Widget build(BuildContext context) {
+    context.watch<FFAppState>();
+
     return GestureDetector(
       onTap: () => FocusScope.of(context).unfocus(),
       child: Scaffold(
@@ -265,32 +276,48 @@ class _VerifyOTPWidgetState extends State<VerifyOTPWidget> {
                                           .divide(const SizedBox(width: 4.0))
                                           .around(const SizedBox(width: 4.0)),
                                     ),
-                                    Text(
-                                      FFLocalizations.of(context).getText(
-                                        '6t61gybm' /* Verification failed */,
-                                      ),
-                                      style: FlutterFlowTheme.of(context)
-                                          .bodyMedium
-                                          .override(
-                                            fontFamily: 'Inter',
-                                            color: FlutterFlowTheme.of(context)
-                                                .error,
-                                            letterSpacing: 0.0,
-                                          ),
-                                    ),
                                     Row(
                                       mainAxisSize: MainAxisSize.max,
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: [
                                         FFButtonWidget(
-                                          onPressed: (_model.textField6TextController
-                                                          .text !=
-                                                      '')
-                                              ? null
-                                              : () {
-                                                  print('Button pressed ...');
-                                                },
+                                          onPressed: () async {
+                                            _model.apiResult24z =
+                                                await SendVerifyStagingCall
+                                                    .call(
+                                              email: FFAppState().email,
+                                            );
+
+                                            if (getJsonField(
+                                              (_model.apiResult24z?.jsonBody ??
+                                                  ''),
+                                              r'''$.success''',
+                                            )) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(
+                                                SnackBar(
+                                                  content: Text(
+                                                    'Sent Code Successfully',
+                                                    style: TextStyle(
+                                                      color:
+                                                          FlutterFlowTheme.of(
+                                                                  context)
+                                                              .primaryText,
+                                                    ),
+                                                  ),
+                                                  duration: const Duration(
+                                                      milliseconds: 4000),
+                                                  backgroundColor:
+                                                      FlutterFlowTheme.of(
+                                                              context)
+                                                          .secondary,
+                                                ),
+                                              );
+                                            }
+
+                                            safeSetState(() {});
+                                          },
                                           text: FFLocalizations.of(context)
                                               .getText(
                                             'g7i3fdfe' /* Resend */,
@@ -323,11 +350,112 @@ class _VerifyOTPWidgetState extends State<VerifyOTPWidget> {
                                         ),
                                         FFButtonWidget(
                                           onPressed: (_model.textField6TextController
-                                                          .text !=
+                                                          .text ==
                                                       '')
                                               ? null
-                                              : () {
-                                                  print('Button pressed ...');
+                                              : () async {
+                                                  _model.response =
+                                                      await VerifyStagingCall
+                                                          .call(
+                                                    email: FFAppState().email,
+                                                    code: int.tryParse(_model
+                                                        .textField6TextController
+                                                        .text),
+                                                  );
+
+                                                  if (getJsonField(
+                                                    (_model.response
+                                                            ?.jsonBody ??
+                                                        ''),
+                                                    r'''$.success''',
+                                                  )) {
+                                                    if (widget.mode ==
+                                                        'EMAIL_VERIFICATION') {
+                                                      _model.signupResponse =
+                                                          await SignUpStagingCall
+                                                              .call(
+                                                        email:
+                                                            FFAppState().email,
+                                                        password:
+                                                            widget.password,
+                                                      );
+
+                                                      if ((_model.signupResponse
+                                                              ?.succeeded ??
+                                                          true)) {
+                                                        await showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (alertDialogContext) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                  'Verify Email Successfully!'),
+                                                              content: const Text(
+                                                                  'Your email has been verified. '),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          alertDialogContext),
+                                                                  child: const Text(
+                                                                      'Ok'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+
+                                                        context.pushNamed(
+                                                            'HomePage');
+                                                      } else {
+                                                        await showDialog(
+                                                          context: context,
+                                                          builder:
+                                                              (alertDialogContext) {
+                                                            return AlertDialog(
+                                                              title: const Text(
+                                                                  'Sign Up Failed!'),
+                                                              content: const Text(
+                                                                  'Cannot Sign Up for this email. Try again. '),
+                                                              actions: [
+                                                                TextButton(
+                                                                  onPressed: () =>
+                                                                      Navigator.pop(
+                                                                          alertDialogContext),
+                                                                  child: const Text(
+                                                                      'Ok'),
+                                                                ),
+                                                              ],
+                                                            );
+                                                          },
+                                                        );
+                                                      }
+                                                    }
+                                                  } else {
+                                                    await showDialog(
+                                                      context: context,
+                                                      builder:
+                                                          (alertDialogContext) {
+                                                        return AlertDialog(
+                                                          title: const Text(
+                                                              'Verify Email Failed!'),
+                                                          content: const Text(
+                                                              'Your code is not correct. Try again. '),
+                                                          actions: [
+                                                            TextButton(
+                                                              onPressed: () =>
+                                                                  Navigator.pop(
+                                                                      alertDialogContext),
+                                                              child: const Text('Ok'),
+                                                            ),
+                                                          ],
+                                                        );
+                                                      },
+                                                    );
+                                                    context.safePop();
+                                                  }
+
+                                                  safeSetState(() {});
                                                 },
                                           text: FFLocalizations.of(context)
                                               .getText(
@@ -357,6 +485,7 @@ class _VerifyOTPWidgetState extends State<VerifyOTPWidget> {
                                             elevation: 3.0,
                                             borderRadius:
                                                 BorderRadius.circular(25.0),
+                                            disabledColor: const Color(0xFFA39FF1),
                                           ),
                                         ),
                                       ],

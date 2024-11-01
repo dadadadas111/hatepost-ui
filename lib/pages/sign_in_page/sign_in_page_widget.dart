@@ -295,57 +295,66 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                                       ),
                                 ),
                               FFButtonWidget(
-                                onPressed: () async {
-                                  _model.response =
-                                      await SignInStagingCall.call(
-                                    email: _model.textController1.text,
-                                    password: _model.textController2.text,
-                                  );
+                                onPressed: ((_model.textController1.text ==
+                                                '') ||
+                                        (_model.textController2.text == ''))
+                                    ? null
+                                    : () async {
+                                        _model.response =
+                                            await SignInStagingCall.call(
+                                          email: _model.textController1.text,
+                                          password: _model.textController2.text,
+                                        );
 
-                                  if ((_model.response?.succeeded ?? true)) {
-                                    FFAppState().tokenExpiredAt =
-                                        functions.getExpiredTokenTime();
-                                    FFAppState().refreshToken = getJsonField(
-                                      (_model.response?.jsonBody ?? ''),
-                                      r'''$.refreshToken''',
-                                    ).toString();
-                                    FFAppState().accessToken = getJsonField(
-                                      (_model.response?.jsonBody ?? ''),
-                                      r'''$.idToken''',
-                                    ).toString();
-                                    safeSetState(() {});
+                                        if ((_model.response?.succeeded ??
+                                            true)) {
+                                          FFAppState().tokenExpiredAt =
+                                              functions.getExpiredTokenTime();
+                                          FFAppState().refreshToken =
+                                              getJsonField(
+                                            (_model.response?.jsonBody ?? ''),
+                                            r'''$.refreshToken''',
+                                          ).toString();
+                                          FFAppState().accessToken =
+                                              getJsonField(
+                                            (_model.response?.jsonBody ?? ''),
+                                            r'''$.idToken''',
+                                          ).toString();
+                                          FFAppState().email =
+                                              _model.textController1.text;
+                                          safeSetState(() {});
 
-                                    context.pushNamed('HomePage');
-                                  } else {
-                                    // this is action to get the error message. will be reused in sign up
-                                    _model.errorCode = getJsonField(
-                                      (_model.response?.jsonBody ?? ''),
-                                      r'''$.message''',
-                                    ).toString();
-                                    _model.errorMessage = () {
-                                      if (_model.errorCode ==
-                                          'INVALID_LOGIN_CREDENTIALS') {
-                                        return 'Email or password is not correct.';
-                                      } else if (_model.errorCode ==
-                                          'INVALID_EMAIL') {
-                                        return 'Email is not valid.';
-                                      } else if ((_model.errorCode ==
-                                              'MISSING_EMAIL') ||
-                                          (_model.errorCode ==
-                                              'MISSING_PASSWORD')) {
-                                        return 'Please input email and password.';
-                                      } else if (_model.errorCode ==
-                                          'EMAIL_EXISTS') {
-                                        return 'This email is used.';
-                                      } else {
-                                        return 'Unexpected error occurs.';
-                                      }
-                                    }();
-                                    safeSetState(() {});
-                                  }
+                                          context.pushNamed('HomePage');
+                                        } else {
+                                          // this is action to get the error message. will be reused in sign up
+                                          _model.errorCode = getJsonField(
+                                            (_model.response?.jsonBody ?? ''),
+                                            r'''$.message''',
+                                          ).toString();
+                                          _model.errorMessage = () {
+                                            if (_model.errorCode ==
+                                                'INVALID_LOGIN_CREDENTIALS') {
+                                              return 'Email or password is not correct.';
+                                            } else if (_model.errorCode ==
+                                                'INVALID_EMAIL') {
+                                              return 'Email is not valid.';
+                                            } else if ((_model.errorCode ==
+                                                    'MISSING_EMAIL') ||
+                                                (_model.errorCode ==
+                                                    'MISSING_PASSWORD')) {
+                                              return 'Please input email and password.';
+                                            } else if (_model.errorCode ==
+                                                'EMAIL_EXISTS') {
+                                              return 'This email is used.';
+                                            } else {
+                                              return 'Unexpected error occurs.';
+                                            }
+                                          }();
+                                          safeSetState(() {});
+                                        }
 
-                                  safeSetState(() {});
-                                },
+                                        safeSetState(() {});
+                                      },
                                 text: FFLocalizations.of(context).getText(
                                   '7j00parm' /* Sign In */,
                                 ),
@@ -366,6 +375,7 @@ class _SignInPageWidgetState extends State<SignInPageWidget> {
                                       ),
                                   elevation: 3.0,
                                   borderRadius: BorderRadius.circular(25.0),
+                                  disabledColor: const Color(0xFFA39FF1),
                                 ),
                               ),
                             ].divide(const SizedBox(height: 16.0)),
